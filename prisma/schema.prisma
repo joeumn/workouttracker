@@ -1,0 +1,253 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== Auth.js Required Models =====
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ===== Core Application Models =====
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts Account[]
+  sessions Session[]
+
+  // App-specific relations
+  mealEntries    MealEntry[]
+  workouts       Workout[]
+  groupMembers   Member[]
+  challenges     Challenge[] @relation("ChallengeCreator")
+  challengeParticipants Challenge[] @relation("ChallengeParticipants")
+  scoreSnapshots ScoreSnapshot[]
+  achievements   Achievement[]
+  notifications  Notification[]
+}
+
+model MealEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  calories    Int
+  protein     Float?
+  carbs       Float?
+  fat         Float?
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model Workout {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  date        DateTime @default(now())
+  duration    Int?     // Duration in minutes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sets Set[]
+
+  @@index([userId, date])
+}
+
+model Set {
+  id        String @id @default(cuid())
+  workoutId String
+  exercise  String
+  reps      Int
+  weight    Float?
+  duration  Int?   // Duration in seconds for time-based exercises
+  distance  Float? // Distance for cardio exercises
+  notes     String?
+  order     Int    @default(1) // Order of sets within workout
+
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@index([workoutId, order])
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members    Member[]
+  challenges Challenge[]
+}
+
+model Member {
+  id      String     @id @default(cuid())
+  userId  String
+  groupId String
+  role    MemberRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+enum MemberRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+model Challenge {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  type        ChallengeType
+  target      Float         // Target value (e.g., total weight lifted, calories burned)
+  unit        String        // Unit of measurement (kg, calories, minutes, etc.)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  creatorId   String
+  groupId     String?
+  
+  creator      User   @relation("ChallengeCreator", fields: [creatorId], references: [id])
+  group        Group? @relation(fields: [groupId], references: [id])
+  participants User[] @relation("ChallengeParticipants")
+  scoreSnapshots ScoreSnapshot[]
+
+  @@index([isActive, startDate, endDate])
+}
+
+enum ChallengeType {
+  WEIGHT_LOSS
+  WEIGHT_GAIN
+  TOTAL_WORKOUTS
+  TOTAL_WEIGHT_LIFTED
+  TOTAL_CALORIES_BURNED
+  TOTAL_DISTANCE
+  CUSTOM
+}
+
+model ScoreSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  challengeId String
+  score       Float
+  timestamp   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId, timestamp])
+  @@index([challengeId, timestamp])
+}
+
+model Achievement {
+  id          String          @id @default(cuid())
+  userId      String
+  type        AchievementType
+  title       String
+  description String
+  value       Float           // Achievement threshold value
+  unlockedAt  DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+enum AchievementType {
+  FIRST_WORKOUT
+  WORKOUT_STREAK
+  WEIGHT_MILESTONE
+  CALORIE_MILESTONE
+  DISTANCE_MILESTONE
+  CHALLENGE_WINNER
+  CUSTOM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  data      Json?            // Additional data for the notification
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+}
+
+enum NotificationType {
+  CHALLENGE_INVITE
+  CHALLENGE_START
+  CHALLENGE_END
+  ACHIEVEMENT_UNLOCKED
+  GROUP_INVITE
+  WORKOUT_REMINDER
+  GENERAL
+}
