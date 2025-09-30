@@ -1,0 +1,36 @@
+{
+  "name": "workouttracker",
+  "version": "1.0.0",
+  "description": "A comprehensive workout tracking application with challenges, leaderboards, and macro tracking",
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "postinstall": "playwright install",
+    "lint": "echo 'No linting configured'",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["fitness", "workout", "tracking", "health", "nutrition"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "@types/node": "^24.6.0",
+    "@vitest/ui": "^3.2.4",
+    "playwright": "^1.55.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.3",
+    "@types/uuid": "^10.0.0",
+    "express": "^5.1.0",
+    "uuid": "^13.0.0"
+  }
+}
