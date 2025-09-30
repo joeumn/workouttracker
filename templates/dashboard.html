@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+                <div class="position-sticky pt-3">
+                    <h5 class="text-white text-center mb-4">
+                        <i class="fas fa-dumbbell"></i> Workout Tracker
+                    </h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white active" href="#dashboard">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#workouts">
+                                <i class="fas fa-running"></i> Workouts
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#vibes">
+                                <i class="fas fa-music"></i> Vibes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#stats">
+                                <i class="fas fa-chart-bar"></i> Stats
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Cards -->
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Workouts This Week</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">4</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-running fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Weekly Goal</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">80%</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-target fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Today's Vibes</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="daily-pack-count">Loading...</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-music fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Streak</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">12 days</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-fire fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vibes Panel -->
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-music"></i> Today's Vibes
+                                </h6>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow">
+                                        <div class="dropdown-header">Actions:</div>
+                                        <a class="dropdown-item" href="#" onclick="refreshVibes()">Refresh</a>
+                                        <a class="dropdown-item" href="#" onclick="addContent()">Add Content</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="daily-pack-container">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading today's vibes...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-list"></i> All Content
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="all-content-container">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-secondary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Row -->
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Recent Workouts</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-borderless" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Duration</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Today</td>
+                                                <td>HIIT</td>
+                                                <td>45 min</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Yesterday</td>
+                                                <td>Strength</td>
+                                                <td>60 min</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2 days ago</td>
+                                                <td>Cardio</td>
+                                                <td>30 min</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Motivation</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5OTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Nb3RpdmF0aW9uPC90ZXh0Pgo8L3N2Zz4K" alt="...">
+                                </div>
+                                <p class="text-center">"The only bad workout is the one that didn't happen."</p>
+                                <div class="text-center">
+                                    <a class="btn btn-primary btn-sm" href="#">Get Motivated!</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Content Modal -->
+    <div class="modal fade" id="addContentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Content</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addContentForm">
+                        <div class="mb-3">
+                            <label for="contentTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="contentTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="contentDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentType" class="form-label">Type</label>
+                            <select class="form-select" id="contentType" required>
+                                <option value="">Select type...</option>
+                                <option value="playlist">Playlist</option>
+                                <option value="video">Video</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentPlatform" class="form-label">Platform</label>
+                            <select class="form-select" id="contentPlatform" required>
+                                <option value="">Select platform...</option>
+                                <option value="spotify">Spotify</option>
+                                <option value="youtube">YouTube</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentUrl" class="form-label">URL</label>
+                            <input type="url" class="form-control" id="contentUrl" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentThumbnail" class="form-label">Thumbnail URL (optional)</label>
+                            <input type="url" class="form-control" id="contentThumbnail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentDuration" class="form-label">Duration (optional)</label>
+                            <input type="text" class="form-control" id="contentDuration" placeholder="e.g., 3:45">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveContent()">Save Content</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
